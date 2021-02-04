@@ -70,7 +70,7 @@ def main():
 
     while True:
         try:
-            new_homework = get_homework_statuses(current_timestamp)
+            new_homework = get_homework_statuses(0)
             if new_homework.get('homeworks'):
                 msg_txt = parse_homework_status(
                     new_homework.get('homeworks')[0]
