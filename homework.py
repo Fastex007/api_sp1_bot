@@ -7,7 +7,7 @@ import time
 from dotenv import load_dotenv
 import telegram
 
-# git load_dotenv()
+# load_dotenv()
 
 
 PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
@@ -65,7 +65,8 @@ def send_message(message, bot_client):
 
 def main():
     tg_bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    current_timestamp = int(time.time())
+    # current_timestamp = int(time.time())
+    current_timestamp = 0
     logging.debug('Бот успешно запущен. Наверное...')
 
     while True:
@@ -80,7 +81,7 @@ def main():
             current_timestamp = new_homework.get('current_date',
                                                  current_timestamp
                                                  )
-            time.sleep(300)
+            time.sleep(5)
 
         except Exception as ex:
             msg_txt = f'Бот столкнулся с ошибкой: {ex}'
