@@ -7,7 +7,7 @@ import time
 from dotenv import load_dotenv
 import telegram
 
-load_dotenv()
+# load_dotenv()
 
 
 PRAKTIKUM_TOKEN = os.environ.get('PRAKTIKUM_TOKEN')
