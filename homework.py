@@ -10,9 +10,9 @@ import telegram
 load_dotenv()
 
 
-PRAKTIKUM_TOKEN = os.getenv("PRAKTIKUM_TOKEN")
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+PRAKTIKUM_TOKEN = os.environ.get('PRAKTIKUM_TOKEN')
+TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
+CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 
 PRAKTIKUM_BASE_URL = (
     'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
@@ -70,7 +70,7 @@ def main():
 
     while True:
         try:
-            new_homework = get_homework_statuses(0)
+            new_homework = get_homework_statuses(current_timestamp)
             if new_homework.get('homeworks'):
                 msg_txt = parse_homework_status(
                     new_homework.get('homeworks')[0]
@@ -80,7 +80,7 @@ def main():
             current_timestamp = new_homework.get('current_date',
                                                  current_timestamp
                                                  )
-            time.sleep(10)
+            time.sleep(300)
 
         except Exception as ex:
             msg_txt = f'Бот столкнулся с ошибкой: {ex}'
