@@ -70,7 +70,7 @@ def main():
 
     while True:
         try:
-            new_homework = get_homework_statuses(current_timestamp)
+            new_homework = get_homework_statuses(0)
             if new_homework.get('homeworks'):
                 msg_txt = parse_homework_status(
                     new_homework.get('homeworks')[0]
@@ -80,7 +80,7 @@ def main():
             current_timestamp = new_homework.get('current_date',
                                                  current_timestamp
                                                  )
-            time.sleep(300)
+            time.sleep(5)
 
         except Exception as ex:
             msg_txt = f'Бот столкнулся с ошибкой: {ex}'
