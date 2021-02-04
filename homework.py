@@ -7,12 +7,12 @@ import time
 from dotenv import load_dotenv
 import telegram
 
-# load_dotenv()
+# git load_dotenv()
 
 
-PRAKTIKUM_TOKEN = os.environ.get('PRAKTIKUM_TOKEN')
-TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
-CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
+PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 PRAKTIKUM_BASE_URL = (
     'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
