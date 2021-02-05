@@ -1,11 +1,11 @@
-from logging.handlers import RotatingFileHandler
 import logging
 import os
 import requests
 import time
+from logging.handlers import RotatingFileHandler
 
-from dotenv import load_dotenv
 import telegram
+from dotenv import load_dotenv
 
 # load_dotenv()
 
@@ -35,11 +35,21 @@ logger.addHandler(handler)
 
 
 def parse_homework_status(homework):
+    error_msg = 'Ошибка получения статуса ДЗ.'
+
     homework_name = homework.get('homework_name')
-    if homework.get('status') == 'rejected':
+    if homework_name is None:
+        logging.error(error_msg)
+        return None
+
+    hw_status = homework.get('status')
+    if hw_status == 'rejected':
         verdict = 'К сожалению в работе нашлись ошибки.'
-    elif homework.get('status') == 'reviewing':
+    elif hw_status == 'reviewing':
         verdict = 'Работа взята на ревью.'
+    elif hw_status is None:
+        logging.error(error_msg)
+        return None
     else:
         verdict = ('Ревьюеру всё понравилось, '
                    'можно приступать к следующему уроку.')
@@ -54,6 +64,14 @@ def get_homework_statuses(current_timestamp):
         params=params,
         headers=headers
     )
+    # в main же обрабатывается исключение,
+    # а get_homework_statuses вызывается оттуда.
+    # Зачем тут нужна праверка ?
+    if homework_statuses.status_code != 200:
+        error_msg = f'Ошибка обращения к Практикуму. '\
+                    f'Status code: {homework_statuses.status_code}'
+        logging.error(error_msg)
+        return None
     return homework_statuses.json()
 
 
@@ -61,24 +79,28 @@ def send_message(message, bot_client):
     return bot_client.send_message(chat_id=CHAT_ID, text=message)
 
 
+tg_bot = telegram.Bot(token=TELEGRAM_TOKEN)
+
+
 def main():
-    tg_bot = telegram.Bot(token=TELEGRAM_TOKEN)
     # current_timestamp = int(time.time())
     current_timestamp = 0
     logging.debug('Бот успешно запущен. Наверное...')
+    get_homework_statuses(current_timestamp)
 
     while True:
         try:
             new_homework = get_homework_statuses(current_timestamp)
-            if new_homework.get('homeworks'):
-                msg_txt = parse_homework_status(
-                    new_homework.get('homeworks')[0]
-                )
-                send_message(msg_txt, tg_bot)
-                logging.info(f'Сообщение отправлено >>> {msg_txt}')
-            current_timestamp = new_homework.get('current_date',
-                                                 current_timestamp
-                                                 )
+            if new_homework:
+                hw_list = new_homework.get('homeworks')
+                if hw_list:
+                    msg_txt = parse_homework_status(hw_list[0])
+                    if msg_txt is not None:
+                        send_message(msg_txt, tg_bot)
+                        logging.info(f'Сообщение отправлено >>> {msg_txt}')
+                current_timestamp = new_homework.get('current_date',
+                                                     int(time.time())
+                                                     )
             time.sleep(300)
 
         except Exception as ex:
