@@ -5,15 +5,13 @@ import time
 from logging.handlers import RotatingFileHandler
 
 import telegram
-from dotenv import load_dotenv
 
-# load_dotenv()
 
 PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 PRAKTIKUM_BASE_URL = (
-    'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
+    'https://praktikum.yandex.ru/api/user_api/{0}'
 )
 
 
@@ -60,7 +58,7 @@ def get_homework_statuses(current_timestamp):
     headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
     params = {'from_date': current_timestamp}
     homework_statuses = requests.get(
-        PRAKTIKUM_BASE_URL,
+        PRAKTIKUM_BASE_URL.format('homework_statuses/'),
         params=params,
         headers=headers
     )
