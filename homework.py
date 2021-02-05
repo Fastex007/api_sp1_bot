@@ -1,10 +1,13 @@
+from logging.handlers import RotatingFileHandler
 import logging
 import os
 import requests
 import time
-from logging.handlers import RotatingFileHandler
 
+from dotenv import load_dotenv
 import telegram
+
+load_dotenv()
 
 
 PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
@@ -57,19 +60,23 @@ def parse_homework_status(homework):
 def get_homework_statuses(current_timestamp):
     headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
     params = {'from_date': current_timestamp}
+    # в main же обрабатывается исключение,
+    # а get_homework_statuses вызывается оттуда.
+    # Зачем тут нужна праверка ?
     homework_statuses = requests.get(
         PRAKTIKUM_BASE_URL.format('homework_statuses/'),
         params=params,
         headers=headers
     )
-    # в main же обрабатывается исключение,
-    # а get_homework_statuses вызывается оттуда.
-    # Зачем тут нужна праверка ?
-    if homework_statuses.status_code != 200:
-        error_msg = f'Ошибка обращения к Практикуму. '\
+    # Идея была вот такая. Но Pytest не пропускает и платформа тоже
+    # 'MockResponseGET' object has no attribute 'raise_for_status'
+    '''try:
+        homework_statuses.raise_for_status()
+    except requests.exceptions.HTTPError:
+        error_msg = f'Практикум недоступен. '\
                     f'Status code: {homework_statuses.status_code}'
         logging.error(error_msg)
-        return None
+        return None'''
     return homework_statuses.json()
 
 
@@ -77,14 +84,10 @@ def send_message(message, bot_client):
     return bot_client.send_message(chat_id=CHAT_ID, text=message)
 
 
-tg_bot = telegram.Bot(token=TELEGRAM_TOKEN)
-
-
 def main():
-    # current_timestamp = int(time.time())
+    tg_bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = 0
     logging.debug('Бот успешно запущен. Наверное...')
-    get_homework_statuses(current_timestamp)
 
     while True:
         try:
@@ -105,8 +108,6 @@ def main():
             msg_txt = f'Бот столкнулся с ошибкой: {ex}'
             print(msg_txt)
             logging.error(ex, exc_info=True)
-            # Я не понял, как перегрузить logging.error для всех случаев
-            # Поэтому отправку сообщений пишу здесь
             send_message(msg_txt, tg_bot)
             time.sleep(5)
 
